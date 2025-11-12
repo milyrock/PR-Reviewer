@@ -1,0 +1,7 @@
+postgres:
+  network: tcp
+  database: ${POSTGRES_DB}
+  host: ${POSTGRES_HOST}
+  port: ${POSTGRES_PORT}
+  username: ${POSTGRES_USER}
+  password: ${POSTGRES_PASSWORD}
