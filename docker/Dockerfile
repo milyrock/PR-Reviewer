@@ -13,5 +13,6 @@ FROM alpine:latest
 WORKDIR /root/
 COPY --from=builder /app/main .
 COPY config ./config
+COPY db ./db
 
 CMD ["./main"]

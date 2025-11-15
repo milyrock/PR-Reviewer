@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -27,7 +26,7 @@ func ReadConfig(path string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(string(file))
+
 	expanded_yaml := os.ExpandEnv(string(file))
 
 	err = yaml.Unmarshal([]byte(expanded_yaml), &config)
