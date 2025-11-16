@@ -196,3 +196,32 @@ curl -X POST http://localhost:8080/pullRequest/reassign \
   ```
 
 
+Результаты нагрузки, полученные с помощью k6:
+
+ TOTAL RESULTS 
+
+    checks_total.......: 305     5.015489/s
+    checks_succeeded...: 100.00% 305 out of 305
+    checks_failed......: 0.00%   0 out of 305
+
+    ✓ TEAM ADD status 201 or 400
+    ✓ PR CREATE status 201 or 404 or 409
+    ✓ PR REASSIGN status 200 or 404 or 409
+    ✓ PR MERGE status 200 or 404
+    ✓ GET REVIEW status 200
+
+    HTTP
+    http_req_duration..............: avg=11.55ms  min=1.11ms  med=10.41ms max=26.9ms p(90)=21.21ms p(95)=22.26ms
+      { expected_response:true }...: avg=13.46ms  min=2.04ms  med=12.01ms max=26.9ms p(90)=21.48ms p(95)=22.42ms
+    http_req_failed................: 20.00% 61 out of 305
+    http_reqs......................: 305    5.015489/s
+
+    EXECUTION
+    iteration_duration.............: avg=996.89ms min=815.7ms med=999.5ms max=1s     p(90)=1s      p(95)=1s     
+    iterations.....................: 61     1.003098/s
+    vus............................: 1      min=1         max=1
+    vus_max........................: 1      min=1         max=1
+
+    NETWORK
+    data_received..................: 99 kB  1.6 kB/s
+    data_sent......................: 71 kB  1.2 kB/s
