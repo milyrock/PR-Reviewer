@@ -9,7 +9,7 @@ DROP TABLE IF EXISTS users;
 CREATE TABLE users (
     user_id VARCHAR(50) PRIMARY KEY,
     username VARCHAR(100) NOT NULL,
-    team_name VARCHAR(100) NOT NULL REFERENCES teams(team_name) ON DELETE CASCADE,
+    team_name VARCHAR(100) NOT NULL REFERENCES teams(team_name),
     is_active BOOLEAN NOT NULL DEFAULT TRUE
 );
 
@@ -25,8 +25,8 @@ CREATE TABLE pull_requests (
 
 DROP TABLE IF EXISTS pr_reviewers;
 CREATE TABLE pr_reviewers (
-    pull_request_id VARCHAR(50) NOT NULL REFERENCES pull_requests(pull_request_id) ON DELETE CASCADE,
-    user_id VARCHAR(50) NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    pull_request_id VARCHAR(50) NOT NULL REFERENCES pull_requests(pull_request_id),
+    user_id VARCHAR(50) NOT NULL REFERENCES users(user_id),
     PRIMARY KEY (pull_request_id, user_id)
 );
 

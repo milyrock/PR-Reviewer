@@ -31,7 +31,7 @@ func (r *Repository) CreateTeam(teamName string, members []models.TeamMember) er
 	if err != nil {
 		return err
 	}
-	
+
 	defer tx.Rollback() //nolint:errcheck
 
 	_, err = tx.Exec(insertTeam, teamName)
@@ -56,16 +56,20 @@ func (r *Repository) TeamExists(teamName string) (bool, error) {
 }
 
 func (r *Repository) GetTeam(teamName string) (*models.Team, error) {
-	var team models.Team
-	team.TeamName = teamName
-
-	err := r.db.Select(&team.Members, selectTeamMembers, teamName)
+	exists, err := r.TeamExists(teamName)
 	if err != nil {
 		return nil, err
 	}
-
-	if len(team.Members) == 0 {
+	if !exists {
 		return nil, sql.ErrNoRows
+	}
+
+	var team models.Team
+	team.TeamName = teamName
+
+	err = r.db.Select(&team.Members, selectTeamMembers, teamName)
+	if err != nil {
+		return nil, err
 	}
 
 	return &team, nil
