@@ -25,26 +25,10 @@ func main() {
 
 	repo := repository.NewRepository(db)
 
-	teamHandler := v1.NewTeamHandler(repo)
-	userHandler := v1.NewUserHandler(repo)
-	prHandler := v1.NewPRHandler(repo)
-	statisticsHandler := v1.NewStatisticsHandler(repo)
-
 	r := mux.NewRouter()
 
-	r.HandleFunc("/health", v1.Health).Methods("GET")
-
-	r.HandleFunc("/team/add", teamHandler.AddTeam).Methods("POST")
-	r.HandleFunc("/team/get", teamHandler.GetTeam).Methods("GET")
-
-	r.HandleFunc("/users/setIsActive", userHandler.SetIsActive).Methods("POST")
-	r.HandleFunc("/users/getReview", userHandler.GetReview).Methods("GET")
-
-	r.HandleFunc("/pullRequest/create", prHandler.CreatePR).Methods("POST")
-	r.HandleFunc("/pullRequest/merge", prHandler.MergePR).Methods("POST")
-	r.HandleFunc("/pullRequest/reassign", prHandler.ReassignPR).Methods("POST")
-
-	r.HandleFunc("/statistics", statisticsHandler.GetStatistics).Methods("GET")
+	api := v1.NewAPI(repo)
+	api.RegisterHandlers(r)
 
 	log.Println("Server starting on port 8080")
 	if err := http.ListenAndServe(":8080", r); err != nil {

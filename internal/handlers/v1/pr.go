@@ -56,7 +56,7 @@ func (h *PRHandler) MergePR(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"pr": pr,
-	}); err != nil{
+	}); err != nil {
 		log.Printf("failed to encode response: %v", err)
 	}
 }
@@ -78,7 +78,7 @@ func (h *PRHandler) ReassignPR(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"pr":          updatedPR,
 		"replaced_by": newReviewerID,
-	}); err != nil{
+	}); err != nil {
 		log.Printf("failed to encode response: %v", err)
 	}
 }
