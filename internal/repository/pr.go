@@ -51,6 +51,17 @@ const (
 		DELETE FROM pr_reviewers
 		WHERE pull_request_id = $1 AND user_id = $2
 	`
+
+	selectPRReviewStats = `
+		SELECT 
+			pr.pull_request_id,
+			pr.pull_request_name,
+			COUNT(prr.user_id) as reviewer_count
+		FROM pull_requests pr
+		LEFT JOIN pr_reviewers prr ON pr.pull_request_id = prr.pull_request_id
+		GROUP BY pr.pull_request_id, pr.pull_request_name
+		ORDER BY pr.created_at DESC
+	`
 )
 
 func (r *Repository) PRExists(pullRequestID string) (bool, error) {
@@ -85,7 +96,7 @@ func (r *Repository) CreatePR(pr *models.PullRequest, reviewerIDs []string) erro
 	if err != nil {
 		return err
 	}
-	
+
 	defer tx.Rollback()
 
 	now := time.Now()
@@ -160,4 +171,10 @@ func (r *Repository) ReassignReviewer(pullRequestID, oldUserID, newUserID string
 	}
 
 	return tx.Commit()
+}
+
+func (r *Repository) GetPRReviewStats() ([]models.PRReviewStats, error) {
+	var stats []models.PRReviewStats
+	err := r.db.Select(&stats, selectPRReviewStats)
+	return stats, err
 }

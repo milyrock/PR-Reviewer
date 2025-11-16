@@ -33,6 +33,17 @@ const (
 		WHERE prr.user_id = $1
 		ORDER BY pr.created_at DESC
 	`
+
+	selectUserReviewStats = `
+		SELECT 
+			u.user_id,
+			u.username,
+			COUNT(prr.pull_request_id) as review_count
+		FROM users u
+		LEFT JOIN pr_reviewers prr ON u.user_id = prr.user_id
+		GROUP BY u.user_id, u.username
+		ORDER BY review_count DESC, u.user_id
+	`
 )
 
 func (r *Repository) GetUser(userID string) (*models.User, error) {
@@ -71,4 +82,10 @@ func (r *Repository) GetUserReviewPRs(userID string) ([]models.PullRequestShort,
 	var prs []models.PullRequestShort
 	err := r.db.Select(&prs, selectUserReviewPRs, userID)
 	return prs, err
+}
+
+func (r *Repository) GetUserReviewStats() ([]models.UserReviewStats, error) {
+	var stats []models.UserReviewStats
+	err := r.db.Select(&stats, selectUserReviewStats)
+	return stats, err
 }

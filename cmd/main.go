@@ -28,6 +28,7 @@ func main() {
 	teamHandler := v1.NewTeamHandler(repo)
 	userHandler := v1.NewUserHandler(repo)
 	prHandler := v1.NewPRHandler(repo)
+	statisticsHandler := v1.NewStatisticsHandler(repo)
 
 	r := mux.NewRouter()
 
@@ -42,6 +43,8 @@ func main() {
 	r.HandleFunc("/pullRequest/create", prHandler.CreatePR).Methods("POST")
 	r.HandleFunc("/pullRequest/merge", prHandler.MergePR).Methods("POST")
 	r.HandleFunc("/pullRequest/reassign", prHandler.ReassignPR).Methods("POST")
+
+	r.HandleFunc("/statistics", statisticsHandler.GetStatistics).Methods("GET")
 
 	log.Println("Server starting on port 8080")
 	if err := http.ListenAndServe(":8080", r); err != nil {

@@ -68,3 +68,20 @@ type ReassignPRRequest struct {
 	PullRequestID string `json:"pull_request_id"`
 	OldUserID     string `json:"old_reviewer_id"`
 }
+
+type UserReviewStats struct {
+	UserID      string `json:"user_id" db:"user_id"`
+	Username    string `json:"username" db:"username"`
+	ReviewCount int    `json:"review_count" db:"review_count"`
+}
+
+type PRReviewStats struct {
+	PullRequestID   string `json:"pull_request_id" db:"pull_request_id"`
+	PullRequestName string `json:"pull_request_name" db:"pull_request_name"`
+	ReviewerCount   int    `json:"reviewer_count" db:"reviewer_count"`
+}
+
+type StatisticsResponse struct {
+	UserStats []UserReviewStats `json:"user_stats"`
+	PRStats   []PRReviewStats   `json:"pr_stats"`
+}
