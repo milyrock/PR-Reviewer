@@ -62,7 +62,6 @@ func TestCreateTeamAndPR(t *testing.T) {
 	server, cleanup := setupTestServer(t)
 	defer cleanup()
 
-	// 1. Создаем команду
 	teamReq := models.CreateTeamRequest{
 		TeamName: "backend",
 		Members: []models.TeamMember{
@@ -78,7 +77,6 @@ func TestCreateTeamAndPR(t *testing.T) {
 	require.Equal(t, http.StatusCreated, resp.StatusCode)
 	resp.Body.Close()
 
-	// 2. Создаем PR
 	prReq := models.CreatePRRequest{
 		PullRequestID:   "pr-1",
 		PullRequestName: "Add feature",
@@ -97,18 +95,16 @@ func TestCreateTeamAndPR(t *testing.T) {
 	require.NoError(t, err)
 	resp.Body.Close()
 
-	// 3. Проверяем, что назначены ревьюверы (до 2, исключая автора)
 	assert.Equal(t, "OPEN", prResp.PR.Status)
 	assert.LessOrEqual(t, len(prResp.PR.AssignedReviewers), 2)
-	assert.NotContains(t, prResp.PR.AssignedReviewers, "u1") // Автор не должен быть ревьювером
-	assert.Greater(t, len(prResp.PR.AssignedReviewers), 0)   // Должен быть хотя бы один ревьювер
+	assert.NotContains(t, prResp.PR.AssignedReviewers, "u1")
+	assert.Greater(t, len(prResp.PR.AssignedReviewers), 0)
 }
 
 func TestMergePRAndReassignRestriction(t *testing.T) {
 	server, cleanup := setupTestServer(t)
 	defer cleanup()
 
-	// 1. Создаем команду
 	teamReq := models.CreateTeamRequest{
 		TeamName: "frontend",
 		Members: []models.TeamMember{
@@ -123,7 +119,6 @@ func TestMergePRAndReassignRestriction(t *testing.T) {
 	require.Equal(t, http.StatusCreated, resp.StatusCode)
 	resp.Body.Close()
 
-	// 2. Создаем PR
 	prReq := models.CreatePRRequest{
 		PullRequestID:   "pr-2",
 		PullRequestName: "Fix bug",
@@ -136,7 +131,6 @@ func TestMergePRAndReassignRestriction(t *testing.T) {
 	require.Equal(t, http.StatusCreated, resp.StatusCode)
 	resp.Body.Close()
 
-	// 3. Мержим PR
 	mergeReq := models.MergePRRequest{
 		PullRequestID: "pr-2",
 	}
@@ -154,7 +148,6 @@ func TestMergePRAndReassignRestriction(t *testing.T) {
 	assert.Equal(t, "MERGED", mergeResp.PR.Status)
 	resp.Body.Close()
 
-	// 4. Пытаемся переназначить ревьювера - должна быть ошибка
 	reassignReq := models.ReassignPRRequest{
 		PullRequestID: "pr-2",
 		OldUserID:     "u2",
@@ -176,7 +169,6 @@ func TestReassignReviewer(t *testing.T) {
 	server, cleanup := setupTestServer(t)
 	defer cleanup()
 
-	// 1. Создаем команду с 4 пользователями
 	teamReq := models.CreateTeamRequest{
 		TeamName: "devops",
 		Members: []models.TeamMember{
@@ -193,7 +185,6 @@ func TestReassignReviewer(t *testing.T) {
 	require.Equal(t, http.StatusCreated, resp.StatusCode)
 	resp.Body.Close()
 
-	// 2. Создаем PR
 	prReq := models.CreatePRRequest{
 		PullRequestID:   "pr-3",
 		PullRequestName: "Deploy config",
@@ -214,7 +205,6 @@ func TestReassignReviewer(t *testing.T) {
 	require.Greater(t, len(originalReviewers), 0)
 	resp.Body.Close()
 
-	// 3. Переназначаем ревьювера
 	oldReviewer := originalReviewers[0]
 	reassignReq := models.ReassignPRRequest{
 		PullRequestID: "pr-3",
@@ -233,7 +223,6 @@ func TestReassignReviewer(t *testing.T) {
 	err = json.NewDecoder(resp.Body).Decode(&reassignResp)
 	require.NoError(t, err)
 
-	// Проверяем, что старый ревьювер заменен
 	assert.NotContains(t, reassignResp.PR.AssignedReviewers, oldReviewer)
 	assert.Contains(t, reassignResp.PR.AssignedReviewers, reassignResp.ReplacedBy)
 	assert.NotEqual(t, oldReviewer, reassignResp.ReplacedBy)
@@ -244,12 +233,11 @@ func TestInactiveUserNotAssigned(t *testing.T) {
 	server, cleanup := setupTestServer(t)
 	defer cleanup()
 
-	// 1. Создаем команду с активным и неактивным пользователем
 	teamReq := models.CreateTeamRequest{
 		TeamName: "qa",
 		Members: []models.TeamMember{
 			{UserID: "u1", Username: "Alice", IsActive: true},
-			{UserID: "u2", Username: "Bob", IsActive: false}, // Неактивный
+			{UserID: "u2", Username: "Bob", IsActive: false},
 			{UserID: "u3", Username: "Charlie", IsActive: true},
 		},
 	}
@@ -260,7 +248,6 @@ func TestInactiveUserNotAssigned(t *testing.T) {
 	require.Equal(t, http.StatusCreated, resp.StatusCode)
 	resp.Body.Close()
 
-	// 2. Создаем PR
 	prReq := models.CreatePRRequest{
 		PullRequestID:   "pr-4",
 		PullRequestName: "Test feature",
@@ -278,7 +265,6 @@ func TestInactiveUserNotAssigned(t *testing.T) {
 	err = json.NewDecoder(resp.Body).Decode(&prResp)
 	require.NoError(t, err)
 
-	// 3. Проверяем, что неактивный пользователь не назначен
 	assert.NotContains(t, prResp.PR.AssignedReviewers, "u2")
 	resp.Body.Close()
 }
@@ -287,7 +273,6 @@ func TestGetReview(t *testing.T) {
 	server, cleanup := setupTestServer(t)
 	defer cleanup()
 
-	// 1. Создаем команду
 	teamReq := models.CreateTeamRequest{
 		TeamName: "backend",
 		Members: []models.TeamMember{
@@ -302,7 +287,6 @@ func TestGetReview(t *testing.T) {
 	require.Equal(t, http.StatusCreated, resp.StatusCode)
 	resp.Body.Close()
 
-	// 2. Создаем PR
 	prReq := models.CreatePRRequest{
 		PullRequestID:   "pr-5",
 		PullRequestName: "New feature",
@@ -315,7 +299,6 @@ func TestGetReview(t *testing.T) {
 	require.Equal(t, http.StatusCreated, resp.StatusCode)
 	resp.Body.Close()
 
-	// 3. Получаем список PR для ревьювера
 	resp, err = http.Get(server.URL + "/users/getReview?user_id=u2")
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, resp.StatusCode)
@@ -337,7 +320,6 @@ func TestStatisticsEndpoint(t *testing.T) {
 	server, cleanup := setupTestServer(t)
 	defer cleanup()
 
-	// 1. Создаем команду
 	teamReq := models.CreateTeamRequest{
 		TeamName: "backend",
 		Members: []models.TeamMember{
@@ -352,7 +334,6 @@ func TestStatisticsEndpoint(t *testing.T) {
 	require.Equal(t, http.StatusCreated, resp.StatusCode)
 	resp.Body.Close()
 
-	// 2. Создаем несколько PR
 	for i := 1; i <= 3; i++ {
 		prReq := models.CreatePRRequest{
 			PullRequestID:   fmt.Sprintf("pr-%d", i),
@@ -367,7 +348,6 @@ func TestStatisticsEndpoint(t *testing.T) {
 		resp.Body.Close()
 	}
 
-	// 3. Получаем статистику
 	resp, err = http.Get(server.URL + "/statistics")
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, resp.StatusCode)
@@ -376,11 +356,9 @@ func TestStatisticsEndpoint(t *testing.T) {
 	err = json.NewDecoder(resp.Body).Decode(&statsResp)
 	require.NoError(t, err)
 
-	// Проверяем, что статистика не пустая
 	assert.Greater(t, len(statsResp.UserStats), 0)
 	assert.Greater(t, len(statsResp.PRStats), 0)
 
-	// Проверяем, что есть статистика по пользователям
 	foundU2 := false
 	for _, userStat := range statsResp.UserStats {
 		if userStat.UserID == "u2" {
@@ -390,7 +368,6 @@ func TestStatisticsEndpoint(t *testing.T) {
 	}
 	assert.True(t, foundU2, "User u2 should be in statistics")
 
-	// Проверяем, что есть статистика по PR
 	assert.Equal(t, 3, len(statsResp.PRStats))
 	resp.Body.Close()
 }
@@ -399,7 +376,6 @@ func TestMergeIdempotency(t *testing.T) {
 	server, cleanup := setupTestServer(t)
 	defer cleanup()
 
-	// 1. Создаем команду
 	teamReq := models.CreateTeamRequest{
 		TeamName: "backend",
 		Members: []models.TeamMember{
@@ -414,7 +390,6 @@ func TestMergeIdempotency(t *testing.T) {
 	require.Equal(t, http.StatusCreated, resp.StatusCode)
 	resp.Body.Close()
 
-	// 2. Создаем PR
 	prReq := models.CreatePRRequest{
 		PullRequestID:   "pr-6",
 		PullRequestName: "Idempotent merge",
@@ -427,7 +402,6 @@ func TestMergeIdempotency(t *testing.T) {
 	require.Equal(t, http.StatusCreated, resp.StatusCode)
 	resp.Body.Close()
 
-	// 3. Мержим PR первый раз
 	mergeReq := models.MergePRRequest{
 		PullRequestID: "pr-6",
 	}
@@ -438,10 +412,9 @@ func TestMergeIdempotency(t *testing.T) {
 	require.Equal(t, http.StatusOK, resp.StatusCode)
 	resp.Body.Close()
 
-	// 4. Мержим PR второй раз - должно быть идемпотентно
 	resp, err = http.Post(server.URL+"/pullRequest/merge", "application/json", bytes.NewBuffer(mergeBody))
 	require.NoError(t, err)
-	require.Equal(t, http.StatusOK, resp.StatusCode) // Не должно быть ошибки
+	require.Equal(t, http.StatusOK, resp.StatusCode)
 
 	var mergeResp struct {
 		PR models.PullRequest `json:"pr"`

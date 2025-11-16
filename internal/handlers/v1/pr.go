@@ -2,11 +2,12 @@ package v1
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
-	"github.com/milyrock/PR-Reviewer/internal/service"
 	"github.com/milyrock/PR-Reviewer/internal/models"
 	"github.com/milyrock/PR-Reviewer/internal/repository"
+	"github.com/milyrock/PR-Reviewer/internal/service"
 )
 
 type PRHandler struct {
@@ -32,9 +33,11 @@ func (h *PRHandler) CreatePR(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCreated)
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"pr": createdPR,
-	})
+	}); err != nil {
+		log.Printf("failed to encode response: %v", err)
+	}
 }
 
 func (h *PRHandler) MergePR(w http.ResponseWriter, r *http.Request) {
@@ -51,9 +54,11 @@ func (h *PRHandler) MergePR(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"pr": pr,
-	})
+	}); err != nil{
+		log.Printf("failed to encode response: %v", err)
+	}
 }
 
 func (h *PRHandler) ReassignPR(w http.ResponseWriter, r *http.Request) {
@@ -70,8 +75,10 @@ func (h *PRHandler) ReassignPR(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"pr":          updatedPR,
 		"replaced_by": newReviewerID,
-	})
+	}); err != nil{
+		log.Printf("failed to encode response: %v", err)
+	}
 }

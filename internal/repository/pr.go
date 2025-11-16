@@ -97,7 +97,7 @@ func (r *Repository) CreatePR(pr *models.PullRequest, reviewerIDs []string) erro
 		return err
 	}
 
-	defer tx.Rollback()
+	defer tx.Rollback() //nolint:errcheck
 
 	now := time.Now()
 	_, err = tx.Exec(insertPR, pr.PullRequestID, pr.PullRequestName, pr.AuthorID, pr.Status, now)
@@ -149,7 +149,7 @@ func (r *Repository) ReassignReviewer(pullRequestID, oldUserID, newUserID string
 		return err
 	}
 
-	defer tx.Rollback()
+	defer tx.Rollback() //nolint:errcheck
 
 	result, err := tx.Exec(deletePRReviewer, pullRequestID, oldUserID)
 	if err != nil {

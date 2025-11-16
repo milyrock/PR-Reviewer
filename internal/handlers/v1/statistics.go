@@ -2,6 +2,7 @@ package v1
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/milyrock/PR-Reviewer/internal/repository"
@@ -24,5 +25,7 @@ func (h *StatisticsHandler) GetStatistics(w http.ResponseWriter, r *http.Request
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(stats)
+	if err := json.NewEncoder(w).Encode(stats); err != nil {
+		log.Printf("failed to encode response: %v", err)
+	}
 }

@@ -2,11 +2,12 @@ package v1
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
-	"github.com/milyrock/PR-Reviewer/internal/service"
 	"github.com/milyrock/PR-Reviewer/internal/models"
 	"github.com/milyrock/PR-Reviewer/internal/repository"
+	"github.com/milyrock/PR-Reviewer/internal/service"
 )
 
 type UserHandler struct {
@@ -31,9 +32,11 @@ func (h *UserHandler) SetIsActive(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"user": user,
-	})
+	}); err != nil {
+		log.Printf("failed to encode response: %v", err)
+	}
 }
 
 func (h *UserHandler) GetReview(w http.ResponseWriter, r *http.Request) {
@@ -50,8 +53,10 @@ func (h *UserHandler) GetReview(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"user_id":       userID,
 		"pull_requests": prs,
-	})
+	}); err != nil {
+		log.Printf("failed to encode response: %v", err)
+	}
 }

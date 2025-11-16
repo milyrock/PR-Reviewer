@@ -31,7 +31,8 @@ func (r *Repository) CreateTeam(teamName string, members []models.TeamMember) er
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	
+	defer tx.Rollback() //nolint:errcheck
 
 	_, err = tx.Exec(insertTeam, teamName)
 	if err != nil {

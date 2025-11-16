@@ -3,11 +3,11 @@ package v1
 import "net/http"
 
 const (
-	statusBadRequest    = http.StatusBadRequest          // 400
-	statusNotFound      = http.StatusNotFound            // 404
-	statusInternalError = http.StatusInternalServerError // 500
-	statusConflict      = http.StatusConflict            // 409
-	statusCreated       = http.StatusCreated             // 201
+	statusBadRequest    = http.StatusBadRequest
+	statusNotFound      = http.StatusNotFound
+	statusInternalError = http.StatusInternalServerError
+	statusConflict      = http.StatusConflict
+	statusCreated       = http.StatusCreated
 )
 
 const (

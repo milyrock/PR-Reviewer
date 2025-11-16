@@ -2,11 +2,12 @@ package v1
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
-	"github.com/milyrock/PR-Reviewer/internal/service"
 	"github.com/milyrock/PR-Reviewer/internal/models"
 	"github.com/milyrock/PR-Reviewer/internal/repository"
+	"github.com/milyrock/PR-Reviewer/internal/service"
 )
 
 type TeamHandler struct {
@@ -32,9 +33,11 @@ func (h *TeamHandler) AddTeam(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCreated)
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"team": team,
-	})
+	}); err != nil {
+		log.Printf("failed to encode response: %v", err)
+	}
 }
 
 func (h *TeamHandler) GetTeam(w http.ResponseWriter, r *http.Request) {
@@ -51,5 +54,7 @@ func (h *TeamHandler) GetTeam(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(team)
+	if err := json.NewEncoder(w).Encode(team); err != nil {
+		log.Printf("failed to encode response: %v", err)
+	}
 }

@@ -3,6 +3,7 @@ package test
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -15,9 +16,7 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-// SetupTestDB создает тестовую БД используя testcontainers
 func SetupTestDB(ctx context.Context) (*sqlx.DB, func(), error) {
-	// Используем контекст с увеличенным таймаутом
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 2*time.Minute)
 	defer cancel()
 
@@ -33,6 +32,7 @@ func SetupTestDB(ctx context.Context) (*sqlx.DB, func(), error) {
 				WithStartupTimeout(60*time.Second),
 		),
 	)
+	
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to start postgres container: %w", err)
 	}
@@ -51,27 +51,24 @@ func SetupTestDB(ctx context.Context) (*sqlx.DB, func(), error) {
 		return nil, nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
-	// Применяем миграции
 	if err := applyMigrations(db); err != nil {
 		return nil, nil, fmt.Errorf("failed to apply migrations: %w", err)
 	}
 
 	cleanup := func() {
 		db.Close()
-		postgresContainer.Terminate(ctx)
+		if err := postgresContainer.Terminate(ctx); err != nil {
+			log.Printf("failed to terminate postgres container: %v", err)
+		}
 	}
 
 	return db, cleanup, nil
 }
 
-// applyMigrations применяет SQL миграции из db/pr.sql
 func applyMigrations(db *sqlx.DB) error {
-	// Получаем путь к файлу миграции относительно корня проекта
 	migrationPath := "db/pr.sql"
 
-	// Если файл не найден, пробуем найти его относительно текущей директории
 	if _, err := os.Stat(migrationPath); os.IsNotExist(err) {
-		// Пробуем найти файл, поднимаясь вверх по директориям
 		wd, _ := os.Getwd()
 		for i := 0; i < 5; i++ {
 			testPath := filepath.Join(wd, migrationPath)

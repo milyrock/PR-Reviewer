@@ -3,10 +3,11 @@ package v1
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 
-	"github.com/milyrock/PR-Reviewer/internal/service"
 	"github.com/milyrock/PR-Reviewer/internal/models"
+	"github.com/milyrock/PR-Reviewer/internal/service"
 )
 
 func handleServiceError(w http.ResponseWriter, err error) {
@@ -31,7 +32,7 @@ func handleServiceError(w http.ResponseWriter, err error) {
 func writeError(w http.ResponseWriter, statusCode int, code, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(models.ErrorResponse{
+	if err := json.NewEncoder(w).Encode(models.ErrorResponse{
 		Error: struct {
 			Code    string `json:"code"`
 			Message string `json:"message"`
@@ -39,5 +40,7 @@ func writeError(w http.ResponseWriter, statusCode int, code, message string) {
 			Code:    code,
 			Message: message,
 		},
-	})
+	}); err != nil {
+		log.Printf("failed to encode response: %v", err)
+	}
 }
